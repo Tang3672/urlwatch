@@ -10,10 +10,12 @@ The format mostly follows [Keep a Changelog](http://keepachangelog.com/en/1.0.0/
 
 - `browser` job: Add support for specifying `useragent` (#700, by Francesco Versaci)
 - Document how to ignore whitespace changes (PR#707, by Paulo Magalhaes)
+- `shell` reporter: Call a script or program when chanegs are detected (fixes #650)
 
 ### Changed
 
 - Docs: Re-group diff-related topics and improve wording (PR#712, by neutric)
+- Improved HTML e-mail diff style, including Dark Mode support (#730, by trevorshannon)
 
 ### Fixed
 
@@ -22,6 +24,9 @@ The format mostly follows [Keep a Changelog](http://keepachangelog.com/en/1.0.0/
 - Fix a ResourceWarning for unclosed files when running unit tests
   (PR#698, by Louis Sautier)
 - Add support for html2text 2.1.1 and newer by feature-checking `-utf8` support via `-help` (fixes #718)
+- html2text options were only applied to the first job when using `job_defaults`
+  (PR#726, fixes #588, by trevorshannon)
+- Update Github tags watch filter documentation with new XPath (fixes #723, by Luis Aranguren)
 
 ## [2.25] -- 2022-03-15
 
