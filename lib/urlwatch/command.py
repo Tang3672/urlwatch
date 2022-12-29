@@ -209,8 +209,12 @@ class UrlwatchCommand:
                 d['filter'] = ','.join(filters)
 
             job = JobBase.unserialize(d)
-            print('Adding %r' % (job,))
-            self.urlwatcher.jobs.append(job)
+            if job.get_guid() in (j.get_guid() for j in self.urlwatcher.jobs):
+                print('Job for "%s" already exists, not adding it.' % job.get_location())
+                save = False
+            else:
+                print('Adding %r' % (job,))
+                self.urlwatcher.jobs.append(job)
 
         if save:
             self.urlwatcher.urls_storage.save(self.urlwatcher.jobs)
