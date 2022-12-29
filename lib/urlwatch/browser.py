@@ -48,7 +48,7 @@ class BrowserLoop(object):
 
     @asyncio.coroutine
     def _launch_browser(self):
-        browser = yield from pyppeteer.launch()
+        browser = yield from pyppeteer.launch({'args': ['--no-sandbox']})
         for p in (yield from browser.pages()):
             yield from p.close()
         return browser
