@@ -38,7 +38,9 @@ from .jobs import NotModifiedError
 
 logger = logging.getLogger(__name__)
 
-MAX_WORKERS = 10
+# Can't run browser jobs in parallel due to memory constraints of GCE instance,
+# so all job types are run serially.
+MAX_WORKERS = 1
 
 
 def run_parallel(func, items):
