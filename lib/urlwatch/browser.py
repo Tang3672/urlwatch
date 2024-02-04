@@ -28,6 +28,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+import http.client
 import logging
 
 import pyppeteer
@@ -62,9 +63,11 @@ class BrowserLoop(object):
             opts['waitUntil'] = wait_until
         if useragent is not None:
             yield from page.setUserAgent(useragent)
-        yield from page.goto(url, opts)
+        resp = yield from page.goto(url, opts)
         content = yield from page.content()
         yield from context.close()
+        if not resp.ok:
+          raise http.client.HTTPException('%d %s' % (resp.status, http.client.responses[resp.status]))
         return content
 
     def process(self, url, wait_until=None, useragent=None):
