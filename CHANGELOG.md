@@ -6,12 +6,45 @@ The format mostly follows [Keep a Changelog](http://keepachangelog.com/en/1.0.0/
 
 ## UNRELEASED
 
+### Changed
+
+- Remove EOL'd Python 3.7 (new minimum requirement is Python 3.8), add Python 3.12 testing
+
+### Fixed
+
+- Fix documentation for watching Github tags and releases, again (#723)
+- Fix `--test-reporter` command-line option so `separate` configuration option is no longer ignored when sending test notifications (#772, by marunjar)
+- Fix line height and dark mode regression (#774 reported by kongomongo, PRs #777 and #778 by trevorshannon)
+- Fix compatibility with lxml >= 5 which caused the CSS Selector filter to fail (#783 reported by jamesquilty, PR #786 by jamstah)
+
+## [2.28] -- 2023-05-03
+
+### Changed
+
+- Browser jobs: Migrate from Pyppeteer to Playwright (#761, by Paul Sattlegger, fixes #751)
+
+## [2.27] -- 2023-05-03
+
+### Added
+
+- `css` and `xpath` filters now accept a `sort` subfilter to sort matched elements lexicographically
+
+### Fixed
+
+- Rework handling of running from a source checkout, fixes issues with example files
+  when `urlwatch` was run as `/usr/sbin/urlwatch`, e.g. on Void Linux (fixes #755)
+- Add support for docutils >= 0.18, which deprecated `frontend.OptionParser` (fixes #754)
+- Browser jobs: Fix support for Python 3.11 with `@asyncio.coroutine` removal (#759, by Faster IT)
+
+## [2.26] -- 2023-04-11
+
 ### Added
 
 - `browser` job: Add support for specifying `useragent` (#700, by Francesco Versaci)
 - Document how to ignore whitespace changes (PR#707, by Paulo Magalhaes)
-- `shell` reporter: Call a script or program when chanegs are detected (fixes #650)
+- `shell` reporter: Call a script or program when changes are detected (fixes #650)
 - New `separate` configuration option for reporters to split reports into one-per-job (contributed by Ryne Everett)
+- `--change-location` option allowing job location to be changed without losing job history (#739, by trevorshannon)
 
 ### Changed
 
@@ -33,6 +66,7 @@ The format mostly follows [Keep a Changelog](http://keepachangelog.com/en/1.0.0/
 - html2text options were only applied to the first job when using `job_defaults`
   (PR#726, fixes #588, by trevorshannon)
 - Update Github tags watch filter documentation with new XPath (fixes #723, by Luis Aranguren)
+- Fix `--gc-cache` to clear unknown keys when using Redis storage (fixes #743, by scottmac) 
 
 ## [2.25] -- 2022-03-15
 
