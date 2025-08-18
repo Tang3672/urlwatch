@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of urlwatch (https://thp.io/2008/urlwatch/).
-# Copyright (c) 2008-2022 Thomas Perl <m@thp.io>
+# Copyright (c) 2008-2023 Thomas Perl <m@thp.io>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -674,6 +674,7 @@ class LxmlParser:
         self.namespaces = subfilter.get('namespaces')
         self.skip = int(subfilter.get('skip', 0))
         self.maxitems = int(subfilter.get('maxitems', 0))
+        self.sort_items = bool(subfilter.get('sort', False))
         if self.method not in ('html', 'xml'):
             raise ValueError('%s method must be "html" or "xml", got %r' % (filter_kind, self.method))
         if self.method == 'html' and self.namespaces is not None:
@@ -760,9 +761,9 @@ class LxmlParser:
         excluded_elems = None
         if self.filter_kind == 'css':
             selected_elems = CSSSelector(self.expression,
-                                         namespaces=self.namespaces).evaluate(root)
+                                         namespaces=self.namespaces)(root)
             excluded_elems = CSSSelector(self.exclude,
-                                         namespaces=self.namespaces).evaluate(root) if self.exclude else None
+                                         namespaces=self.namespaces)(root) if self.exclude else None
         elif self.filter_kind == 'xpath':
             selected_elems = root.xpath(self.expression, namespaces=self.namespaces)
             excluded_elems = root.xpath(self.exclude, namespaces=self.namespaces) if self.exclude else None
@@ -777,7 +778,8 @@ class LxmlParser:
             elements = elements[self.skip:]
         if self.maxitems:
             elements = elements[:self.maxitems]
-        return '\n'.join(self._to_string(element) for element in elements)
+        elements = (self._to_string(element) for element in elements)
+        return '\n'.join(sorted(elements) if self.sort_items else elements)
 
 
 LXML_PARSER_COMMON_SUBFILTERS = {
@@ -786,6 +788,7 @@ LXML_PARSER_COMMON_SUBFILTERS = {
     'namespaces': 'Mapping of XML namespaces for matching',
     'skip': 'Number of elements to skip from the beginning (default: 0)',
     'maxitems': 'Maximum number of items to return (default: all)',
+    'sort': 'Sort matched items after filtering (default: False)',
 }
 
 
