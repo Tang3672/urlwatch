@@ -49,7 +49,7 @@ class BrowserLoop(object):
     async def _launch_browser(self):
         browser = await pyppeteer.launch(
             headless=True,
-            executablePath='/usr/bin/google-chrome-stable',  # or chromium browser path
+            executablePath='/usr/bin/chromium',  # or chromium browser path
             args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox']
         )
         for p in (await browser.pages()):
