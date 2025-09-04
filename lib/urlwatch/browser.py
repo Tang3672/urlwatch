@@ -56,7 +56,7 @@ class BrowserLoop(object):
             await p.close()
         return browser
 
-    async def _get_content(self, url, wait_until=None, useragent=None):
+        async def _get_content(self, url, wait_until=None, useragent=None):
         context = await self._browser.createIncognitoBrowserContext()
         page = await context.newPage()
         opts = {}
@@ -64,10 +64,71 @@ class BrowserLoop(object):
             opts['waitUntil'] = wait_until
         if useragent is not None:
             await page.setUserAgent(useragent)
+
+        # === BEGIN: sanitize dynamic time text for time.gov and setyourwatchby ===
+        try:
+            if ("www.time.gov" in url) or ("setyourwatchby.netlify.app" in url):
+                # Remove only the "Your Device's Clock" section (time.gov),
+                # and blank live HH:MM:SS occurrences (both sites) before content is captured.
+                await page.evaluateOnNewDocument("""
+                    () => {
+                      const killByText = (root, txt) => {
+                        const walker = document.createTreeWalker(
+                          root, NodeFilter.SHOW_ELEMENT
+                        );
+                        const toRemove = [];
+                        while (walker.nextNode()) {
+                          const el = walker.currentNode;
+                          if (!el || !el.textContent) continue;
+                          if (el.textContent.indexOf(txt) !== -1) {
+                            // Remove the nearest block container so we drop the whole "device clock" section
+                            const target = el.closest('section,article,div,p') || el;
+                            toRemove.push(target);
+                          }
+                        }
+                        toRemove.forEach(n => n && n.remove && n.remove());
+                      };
+
+                      const stripHHMMSS = (root) => {
+                        // Matches 22:41:09  and also 07:41:09 P.M. / A.M.
+                        const re = /\\b\\d{1,2}:\\d{2}:\\d{2}(?:\\s*[AP]\\.M\\.)?\\b/g;
+                        const walker = document.createTreeWalker(
+                          root, NodeFilter.SHOW_TEXT
+                        );
+                        const edits = [];
+                        while (walker.nextNode()) {
+                          const node = walker.currentNode;
+                          if (node && re.test(node.textContent)) {
+                            edits.push(node);
+                          }
+                        }
+                        edits.forEach(n => {
+                          n.textContent = n.textContent.replace(re, "");
+                        });
+                      };
+
+                      document.addEventListener('DOMContentLoaded', () => {
+                        const root = document.body || document.documentElement;
+
+                        // time.gov: remove ONLY the device-clock block (straight/curly apostrophes)
+                        killByText(root, "Your Device's Clock");
+                        killByText(root, "Your Device’s Clock");
+
+                        // both sites: blank out live HH:MM:SS strings to avoid constant diffs
+                        stripHHMMSS(root);
+                      });
+                    }
+                """)
+        except Exception:
+            # If anything goes wrong here, we silently proceed without sanitization
+            pass
+        # === END: sanitizer ===
+
         await page.goto(url, opts)
         content = await page.content()
         await context.close()
         return content
+
 
     def process(self, url, wait_until=None, useragent=None):
         coroutine = self._get_content(url, wait_until=wait_until, useragent=useragent)
