@@ -56,7 +56,7 @@ class BrowserLoop(object):
             await p.close()
         return browser
 
-        async def _get_content(self, url, wait_until=None, useragent=None):
+    async def _get_content(self, url, wait_until=None, useragent=None):
         context = await self._browser.createIncognitoBrowserContext()
         page = await context.newPage()
         opts = {}
